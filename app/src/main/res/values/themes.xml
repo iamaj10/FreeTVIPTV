@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.FreeTVIPTV" parent="Theme.AppCompat.DayNight.NoActionBar" />
+</resources>
