@@ -7,19 +7,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.tv.material3.Card
 import androidx.tv.material3.Text
-import com.freetv.iptv.data.sampleChannels
 import com.freetv.iptv.model.Channel
+import com.freetv.iptv.data.testPlaylist
+import com.freetv.iptv.parser.M3UParser
 
 @Composable
 fun HomeScreen(
     onChannelSelected: (Channel) -> Unit
 ) {
+    val channels = M3UParser.parse(testPlaylist)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-
-        items(sampleChannels) { channel ->
+        items(channels) { channel ->
 
             Card(
                 onClick = {
