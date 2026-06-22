@@ -16,6 +16,8 @@ import androidx.activity.compose.BackHandler
 import com.freetv.iptv.model.Channel
 import com.freetv.iptv.screen.HomeScreen
 import com.freetv.iptv.ui.theme.FreeTVIPTVTheme
+import com.freetv.iptv.data.testPlaylist
+import com.freetv.iptv.parser.M3UParser
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +31,10 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf<Channel?>(null)
             }
 
+            val channels = remember {
+                M3UParser.parse(testPlaylist)
+            }
+
             FreeTVIPTVTheme {
 
                 Surface(
@@ -39,6 +45,7 @@ class MainActivity : ComponentActivity() {
                     if (selectedChannel == null) {
 
                         HomeScreen(
+                            channels = channels,
                             onChannelSelected = {
                                 selectedChannel = it
                             }
