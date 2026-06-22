@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
+import androidx.activity.compose.BackHandler
 import com.freetv.iptv.model.Channel
 import com.freetv.iptv.screen.HomeScreen
 import com.freetv.iptv.ui.theme.FreeTVIPTVTheme
@@ -44,6 +45,10 @@ class MainActivity : ComponentActivity() {
                         )
 
                     } else {
+
+                        BackHandler {
+                            selectedChannel = null
+                        }
 
                         VideoPlayerScreen(
                             streamUrl = selectedChannel!!.streamUrl
