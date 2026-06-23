@@ -7,22 +7,30 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.tv.material3.Card
 import androidx.tv.material3.Text
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @Composable
 fun CategoryScreen(
     categories: List<String>,
-    onCategorySelected: (String) -> Unit
-) {
+    initialIndex: Int,
+    onCategorySelected: (String, Int) -> Unit
+){
+
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = initialIndex
+    )
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize()
     ) {
 
-        items(categories) { category ->
+        itemsIndexed(categories) { index, category ->
 
             Card(
                 onClick = {
-                    onCategorySelected(category)
+                    onCategorySelected(category, index)
                 }
             ) {
 

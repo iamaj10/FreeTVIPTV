@@ -80,6 +80,18 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf<String?>(null)
             }
 
+            var categoryScrollIndex by remember {
+                mutableStateOf(0)
+            }
+
+            var channelScrollIndex by remember {
+                mutableStateOf(0)
+            }
+
+            var selectedChannelIndex by remember {
+                mutableStateOf(0)
+            }
+
             LaunchedEffect(Unit) {
 
                 val savedUrl =
@@ -268,9 +280,14 @@ class MainActivity : ComponentActivity() {
                                         .distinct()
                                         .sorted(),
 
-                                    onCategorySelected = { category ->
+                                    initialIndex = categoryScrollIndex,
+
+                                    onCategorySelected = { category, index ->
+
+                                        categoryScrollIndex = index
 
                                         selectedCategory = category
+                                        selectedChannelIndex = 0
 
                                         currentScreen =
                                             AppScreen.CATEGORY_CHANNELS
@@ -293,9 +310,13 @@ class MainActivity : ComponentActivity() {
                                         it.category == selectedCategory
                                     },
 
-                                    onChannelSelected = {
+                                    initialIndex = selectedChannelIndex,
 
-                                        selectedChannel = it
+                                    onChannelSelected = { channel, index ->
+
+                                        selectedChannelIndex = index
+
+                                        selectedChannel = channel
 
                                         currentScreen =
                                             AppScreen.PLAYER

@@ -8,15 +8,23 @@ import androidx.compose.ui.Modifier
 import androidx.tv.material3.Card
 import androidx.tv.material3.Text
 import com.freetv.iptv.model.Channel
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 
 @Composable
 fun CategoryChannelsScreen(
     categoryName: String,
     channels: List<Channel>,
-    onChannelSelected: (Channel) -> Unit
-) {
+    initialIndex: Int,
+    onChannelSelected: (Channel, Int) -> Unit
+){
+
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = initialIndex
+    )
 
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize()
     ) {
 
@@ -31,11 +39,11 @@ fun CategoryChannelsScreen(
             )
         }
 
-        items(channels) { channel ->
+        itemsIndexed(channels) { index, channel ->
 
             Card(
                 onClick = {
-                    onChannelSelected(channel)
+                    onChannelSelected(channel, index)
                 }
             ) {
 
