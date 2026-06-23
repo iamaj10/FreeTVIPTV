@@ -13,8 +13,9 @@ import androidx.compose.material3.TextField
 
 @Composable
 fun URLInputScreen(
+    isLoading: Boolean,
     onLoadClicked: (String) -> Unit
-) {
+){
 
     var url by remember {
         mutableStateOf("")
@@ -37,6 +38,13 @@ fun URLInputScreen(
                 url = it
             }
         )
+
+        if (isLoading) {
+
+            Text(
+                text = "Loading playlist..."
+            )
+        }
 
         Button(
             onClick = {

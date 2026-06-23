@@ -1,9 +1,6 @@
 package com.freetv.iptv
 
 import android.os.Bundle
-import android.net.Uri
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +13,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+import com.freetv.iptv.network.PlaylistDownloader
 import com.freetv.iptv.model.Channel
 import com.freetv.iptv.screen.HomeScreen
 import com.freetv.iptv.ui.theme.FreeTVIPTVTheme
@@ -52,25 +55,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            val playlistPicker = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.OpenDocument()
-            ) { uri: Uri? ->
-
-                if (uri != null) {
-
-                    val content = contentResolver
-                        .openInputStream(uri)
-                        ?.bufferedReader()
-                        ?.use { it.readText() }
-
-                    if (content != null) {
-
-                        channels = M3UParser.parse(content)
-
-                        currentScreen = AppScreen.CHANNELS
-                    }
-                }
+            var isLoading by remember {
+                mutableStateOf(false)
             }
+
+            val scope = rememberCoroutineScope()
 
             FreeTVIPTVTheme {
 
@@ -111,9 +100,38 @@ class MainActivity : ComponentActivity() {
                             }
 
                             URLInputScreen(
+                                isLoading = isLoading,
                                 onLoadClicked = { url ->
 
-                                    // We'll implement download next
+                                    if (
+                                        !url.startsWith("http://") &&
+                                        !url.startsWith("https://")
+                                    ) {
+                                        return@URLInputScreen
+                                    }
+
+                                    scope.launch {
+
+                                        isLoading = true
+
+                                        val playlistContent =
+                                            withContext(Dispatchers.IO) {
+
+                                                PlaylistDownloader.download(url)
+                                            }
+
+                                        isLoading = false
+
+                                        if (playlistContent != null) {
+
+                                            channels = M3UParser.parse(
+                                                playlistContent
+                                            )
+
+                                            currentScreen =
+                                                AppScreen.CHANNELS
+                                        }
+                                    }
                                 }
                             )
                         }
