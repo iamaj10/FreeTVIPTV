@@ -19,7 +19,7 @@ object PlaylistDownloader {
                 .execute()
                 .use { response ->
 
-                    response.body?.string()
+                    response.body.string()
                 }
 
         } catch (e: Exception) {

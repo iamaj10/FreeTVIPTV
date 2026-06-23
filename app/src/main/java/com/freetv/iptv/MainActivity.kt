@@ -24,7 +24,6 @@ import com.freetv.iptv.network.PlaylistDownloader
 import com.freetv.iptv.model.Channel
 import com.freetv.iptv.screen.HomeScreen
 import com.freetv.iptv.ui.theme.FreeTVIPTVTheme
-import com.freetv.iptv.data.testPlaylist
 import com.freetv.iptv.parser.M3UParser
 import com.freetv.iptv.screen.MainMenuScreen
 import com.freetv.iptv.screen.URLInputScreen
