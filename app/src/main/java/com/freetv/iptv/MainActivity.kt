@@ -14,6 +14,8 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import com.freetv.iptv.data.DataStoreManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +28,7 @@ import com.freetv.iptv.data.testPlaylist
 import com.freetv.iptv.parser.M3UParser
 import com.freetv.iptv.screen.MainMenuScreen
 import com.freetv.iptv.screen.URLInputScreen
+import com.freetv.iptv.screen.LoadingScreen
 
 enum class AppScreen {
     MENU,
@@ -40,6 +43,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+
+            val context = this
 
             var selectedChannel by remember {
                 mutableStateOf<Channel?>(null)
@@ -59,6 +64,39 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(false)
             }
 
+            var startupChecked by remember {
+                mutableStateOf(false)
+            }
+
+            LaunchedEffect(Unit) {
+
+                val savedUrl =
+                    DataStoreManager.getPlaylistUrl(context)
+
+                if (savedUrl != null) {
+
+                    isLoading = true
+
+                    val playlistContent =
+                        withContext(Dispatchers.IO) {
+                            PlaylistDownloader.download(savedUrl)
+                        }
+
+                    if (playlistContent != null) {
+
+                        channels = M3UParser.parse(
+                            playlistContent
+                        )
+
+                        currentScreen = AppScreen.CHANNELS
+                    }
+
+                    isLoading = false
+                }
+
+                startupChecked = true
+            }
+
             val scope = rememberCoroutineScope()
 
             FreeTVIPTVTheme {
@@ -67,6 +105,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     shape = RectangleShape
                 ) {
+
+                    if (!startupChecked) {
+
+                        LoadingScreen()
+
+                    } else {
+
 
                     when (currentScreen) {
 
@@ -111,6 +156,11 @@ class MainActivity : ComponentActivity() {
                                     }
 
                                     scope.launch {
+
+                                        DataStoreManager.savePlaylistUrl(
+                                            context,
+                                            url
+                                        )
 
                                         isLoading = true
 
@@ -162,6 +212,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
+                }
                 }
             }
         }
