@@ -287,8 +287,9 @@ class MainActivity : ComponentActivity() {
 
                                 CategoryChannelsScreen(
 
-                                    channels = channels.filter {
+                                    categoryName = selectedCategory ?: "Unknown",
 
+                                    channels = channels.filter {
                                         it.category == selectedCategory
                                     },
 

@@ -11,6 +11,7 @@ import com.freetv.iptv.model.Channel
 
 @Composable
 fun CategoryChannelsScreen(
+    categoryName: String,
     channels: List<Channel>,
     onChannelSelected: (Channel) -> Unit
 ) {
@@ -18,6 +19,17 @@ fun CategoryChannelsScreen(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
+
+        item {
+
+            Text(
+                text = categoryName
+            )
+
+            Text(
+                text = "${channels.size} Channels"
+            )
+        }
 
         items(channels) { channel ->
 
