@@ -1,6 +1,9 @@
 package com.freetv.iptv
 
 import android.os.Bundle
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,13 +22,14 @@ import com.freetv.iptv.ui.theme.FreeTVIPTVTheme
 import com.freetv.iptv.data.testPlaylist
 import com.freetv.iptv.parser.M3UParser
 import com.freetv.iptv.screen.MainMenuScreen
+import com.freetv.iptv.screen.URLInputScreen
 
 enum class AppScreen {
     MENU,
+    URL_INPUT,
     CHANNELS,
     PLAYER
 }
-
 class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalTvMaterial3Api::class)
@@ -42,8 +46,30 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(AppScreen.MENU)
             }
 
-            val channels = remember {
-                M3UParser.parse(testPlaylist)
+            var channels by remember {
+                mutableStateOf(
+                    M3UParser.parse(testPlaylist)
+                )
+            }
+
+            val playlistPicker = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.OpenDocument()
+            ) { uri: Uri? ->
+
+                if (uri != null) {
+
+                    val content = contentResolver
+                        .openInputStream(uri)
+                        ?.bufferedReader()
+                        ?.use { it.readText() }
+
+                    if (content != null) {
+
+                        channels = M3UParser.parse(content)
+
+                        currentScreen = AppScreen.CHANNELS
+                    }
+                }
             }
 
             FreeTVIPTVTheme {
@@ -67,13 +93,27 @@ class MainActivity : ComponentActivity() {
                                         }
 
                                         "Load Playlist" -> {
-                                            // We'll implement this next
+                                            currentScreen = AppScreen.URL_INPUT
                                         }
 
                                         "Settings" -> {
                                             // Future screen
                                         }
                                     }
+                                }
+                            )
+                        }
+
+                        AppScreen.URL_INPUT -> {
+
+                            BackHandler {
+                                currentScreen = AppScreen.MENU
+                            }
+
+                            URLInputScreen(
+                                onLoadClicked = { url ->
+
+                                    // We'll implement download next
                                 }
                             )
                         }
