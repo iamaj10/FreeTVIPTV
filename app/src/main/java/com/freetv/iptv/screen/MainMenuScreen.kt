@@ -16,7 +16,7 @@ fun MainMenuScreen(
     val menuItems = listOf(
         "Load Playlist",
         "Channels",
-        "Settings"
+        "Playlists"
     )
 
     LazyColumn(
