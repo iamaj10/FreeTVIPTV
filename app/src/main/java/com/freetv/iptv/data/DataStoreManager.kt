@@ -35,4 +35,14 @@ object DataStoreManager {
 
         return prefs[PLAYLIST_URL]
     }
+
+    suspend fun clearPlaylistUrl(
+        context: Context
+    ) {
+
+        context.dataStore.edit { prefs ->
+
+            prefs.remove(PLAYLIST_URL)
+        }
+    }
 }

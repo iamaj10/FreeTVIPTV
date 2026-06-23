@@ -29,10 +29,12 @@ import com.freetv.iptv.parser.M3UParser
 import com.freetv.iptv.screen.MainMenuScreen
 import com.freetv.iptv.screen.URLInputScreen
 import com.freetv.iptv.screen.LoadingScreen
+import com.freetv.iptv.screen.SettingsScreen
 
 enum class AppScreen {
     MENU,
     URL_INPUT,
+    SETTINGS,
     CHANNELS,
     PLAYER
 }
@@ -55,8 +57,8 @@ class MainActivity : ComponentActivity() {
             }
 
             var channels by remember {
-                mutableStateOf(
-                    M3UParser.parse(testPlaylist)
+                mutableStateOf<List<Channel>>(
+                    emptyList()
                 )
             }
 
@@ -84,11 +86,11 @@ class MainActivity : ComponentActivity() {
 
                     if (playlistContent != null) {
 
-                        channels = M3UParser.parse(
-                            playlistContent
-                        )
+                        channels =
+                            M3UParser.parse(playlistContent)
 
-                        currentScreen = AppScreen.CHANNELS
+                        currentScreen =
+                            AppScreen.CHANNELS
                     }
 
                     isLoading = false
@@ -106,13 +108,11 @@ class MainActivity : ComponentActivity() {
                     shape = RectangleShape
                 ) {
 
-                    if (!startupChecked) {
+                    if (isLoading) {
 
                         LoadingScreen()
 
-                    } else {
-
-
+                    }else {
                     when (currentScreen) {
 
                         AppScreen.MENU -> {
@@ -131,7 +131,7 @@ class MainActivity : ComponentActivity() {
                                         }
 
                                         "Settings" -> {
-                                            // Future screen
+                                            currentScreen = AppScreen.SETTINGS
                                         }
                                     }
                                 }
@@ -209,6 +209,34 @@ class MainActivity : ComponentActivity() {
 
                             VideoPlayerScreen(
                                 streamUrl = selectedChannel!!.streamUrl
+                            )
+                        }
+
+                        AppScreen.SETTINGS -> {
+
+                            BackHandler {
+                                currentScreen = AppScreen.MENU
+                            }
+
+                            SettingsScreen(
+                                onChangePlaylist = {
+                                    currentScreen = AppScreen.URL_INPUT
+                                },
+                                onClearPlaylist = {
+
+                                    scope.launch {
+
+                                        DataStoreManager.clearPlaylistUrl(
+                                            context
+                                        )
+
+                                        channels = emptyList()
+
+                                        selectedChannel = null
+
+                                        currentScreen = AppScreen.URL_INPUT
+                                    }
+                                }
                             )
                         }
                     }
