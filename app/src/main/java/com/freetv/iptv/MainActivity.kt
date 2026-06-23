@@ -31,6 +31,7 @@ import com.freetv.iptv.screen.LoadingScreen
 import com.freetv.iptv.screen.PlaylistsScreen
 import com.freetv.iptv.screen.CategoryScreen
 import com.freetv.iptv.screen.CategoryChannelsScreen
+import com.freetv.iptv.screen.SearchScreen
 
 enum class AppScreen {
     MENU,
@@ -38,6 +39,7 @@ enum class AppScreen {
     PLAYLISTS,
     CATEGORIES,
     CATEGORY_CHANNELS,
+    SEARCH,
     PLAYER
 }
 class MainActivity : ComponentActivity() {
@@ -147,7 +149,9 @@ class MainActivity : ComponentActivity() {
                                         "Channels" -> {
                                                 currentScreen = AppScreen.CATEGORIES
                                             }
-
+                                        "Search" -> {
+                                            currentScreen = AppScreen.SEARCH
+                                        }
                                             "Load Playlist" -> {
                                                 currentScreen = AppScreen.URL_INPUT
                                             }
@@ -317,6 +321,25 @@ class MainActivity : ComponentActivity() {
                                         selectedChannelIndex = index
 
                                         selectedChannel = channel
+
+                                        currentScreen =
+                                            AppScreen.PLAYER
+                                    }
+                                )
+                            }
+                            AppScreen.SEARCH -> {
+
+                                BackHandler {
+                                    currentScreen = AppScreen.MENU
+                                }
+
+                                SearchScreen(
+
+                                    channels = channels,
+
+                                    onChannelSelected = {
+
+                                        selectedChannel = it
 
                                         currentScreen =
                                             AppScreen.PLAYER

@@ -14,8 +14,9 @@ fun MainMenuScreen(
 ) {
 
     val menuItems = listOf(
-        "Load Playlist",
         "Channels",
+        "Search",
+        "Load Playlist",
         "Playlists"
     )
 
