@@ -11,18 +11,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Card
-import androidx.tv.material3.Text
+import androidx.compose.material3.Text
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.runtime.LaunchedEffect
 import com.freetv.iptv.model.Channel
 
 @Composable
 fun SearchScreen(
     channels: List<Channel>,
+    searchQuery: String,
+    onSearchQueryChanged: (String) -> Unit,
     onChannelSelected: (Channel) -> Unit
 ) {
-
-    var searchQuery by remember {
-        mutableStateOf("")
-    }
 
     val filteredChannels = remember(
         searchQuery,
@@ -45,6 +46,14 @@ fun SearchScreen(
         }
     }
 
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,13 +67,35 @@ fun SearchScreen(
             text = "Search Channels"
         )
 
+        if (searchQuery.isNotBlank()) {
+
+            Text(
+                text = "${filteredChannels.size} Results"
+            )
+        }
+
         TextField(
+            modifier = Modifier.focusRequester(
+                focusRequester
+            ),
+
             value = searchQuery,
 
             onValueChange = {
-                searchQuery = it
+                onSearchQueryChanged(it)
             }
         )
+
+        if (
+            searchQuery.isNotBlank() &&
+            filteredChannels.isEmpty()
+        ) {
+
+            Text(
+                text = "No channels found"
+            )
+        }
+
 
         LazyColumn {
 
@@ -77,7 +108,7 @@ fun SearchScreen(
                 ) {
 
                     Text(
-                        text = channel.name
+                        text = "${channel.name} (${channel.category})"
                     )
                 }
             }

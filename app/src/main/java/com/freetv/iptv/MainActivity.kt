@@ -94,6 +94,14 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(0)
             }
 
+            var previousScreen by remember {
+                mutableStateOf(AppScreen.MENU)
+            }
+
+            var searchQuery by remember {
+                mutableStateOf("")
+            }
+
             LaunchedEffect(Unit) {
 
                 val savedUrl =
@@ -232,7 +240,7 @@ class MainActivity : ComponentActivity() {
                             AppScreen.PLAYER -> {
 
                                 BackHandler {
-                                    currentScreen = AppScreen.CATEGORY_CHANNELS
+                                    currentScreen = previousScreen
                                 }
 
                                 VideoPlayerScreen(
@@ -318,6 +326,8 @@ class MainActivity : ComponentActivity() {
 
                                     onChannelSelected = { channel, index ->
 
+                                        previousScreen = AppScreen.CATEGORY_CHANNELS
+
                                         selectedChannelIndex = index
 
                                         selectedChannel = channel
@@ -337,12 +347,19 @@ class MainActivity : ComponentActivity() {
 
                                     channels = channels,
 
+                                    searchQuery = searchQuery,
+
+                                    onSearchQueryChanged = {
+                                        searchQuery = it
+                                    },
+
                                     onChannelSelected = {
+
+                                        previousScreen = AppScreen.SEARCH
 
                                         selectedChannel = it
 
-                                        currentScreen =
-                                            AppScreen.PLAYER
+                                        currentScreen = AppScreen.PLAYER
                                     }
                                 )
                             }
