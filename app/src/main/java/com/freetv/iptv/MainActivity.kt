@@ -29,12 +29,15 @@ import com.freetv.iptv.screen.MainMenuScreen
 import com.freetv.iptv.screen.URLInputScreen
 import com.freetv.iptv.screen.LoadingScreen
 import com.freetv.iptv.screen.PlaylistsScreen
+import com.freetv.iptv.screen.CategoryScreen
+import com.freetv.iptv.screen.CategoryChannelsScreen
 
 enum class AppScreen {
     MENU,
     URL_INPUT,
     PLAYLISTS,
-    CHANNELS,
+    CATEGORIES,
+    CATEGORY_CHANNELS,
     PLAYER
 }
 class MainActivity : ComponentActivity() {
@@ -73,6 +76,10 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf<String?>(null)
             }
 
+            var selectedCategory by remember {
+                mutableStateOf<String?>(null)
+            }
+
             LaunchedEffect(Unit) {
 
                 val savedUrl =
@@ -94,7 +101,7 @@ class MainActivity : ComponentActivity() {
                             M3UParser.parse(playlistContent)
 
                         currentScreen =
-                            AppScreen.CHANNELS
+                            AppScreen.CATEGORIES
                     }
 
                     isLoading = false
@@ -117,9 +124,8 @@ class MainActivity : ComponentActivity() {
                         LoadingScreen()
 
                     }else {
-                    when (currentScreen) {
-
-                        AppScreen.MENU -> {
+                        when (currentScreen) {
+                            AppScreen.MENU -> {
 
                             MainMenuScreen(
                                 onMenuSelected = { item ->
@@ -127,127 +133,174 @@ class MainActivity : ComponentActivity() {
                                     when (item) {
 
                                         "Channels" -> {
-                                            currentScreen = AppScreen.CHANNELS
-                                        }
-
-                                        "Load Playlist" -> {
-                                            currentScreen = AppScreen.URL_INPUT
-                                        }
-
-                                        "Playlists" -> {
-                                            currentScreen = AppScreen.PLAYLISTS
-                                        }
-                                    }
-                                }
-                            )
-                        }
-
-                        AppScreen.URL_INPUT -> {
-
-                            BackHandler {
-                                currentScreen = AppScreen.MENU
-                            }
-
-                            URLInputScreen(
-                                isLoading = isLoading,
-                                onLoadClicked = { url ->
-
-                                    if (
-                                        !url.startsWith("http://") &&
-                                        !url.startsWith("https://")
-                                    ) {
-                                        return@URLInputScreen
-                                    }
-
-                                    scope.launch {
-
-                                        DataStoreManager.savePlaylistUrl(
-                                            context,
-                                            url
-                                        )
-
-                                        currentPlaylistUrl = url
-
-                                        isLoading = true
-
-                                        val playlistContent =
-                                            withContext(Dispatchers.IO) {
-
-                                                PlaylistDownloader.download(url)
+                                                currentScreen = AppScreen.CATEGORIES
                                             }
 
-                                        isLoading = false
+                                            "Load Playlist" -> {
+                                                currentScreen = AppScreen.URL_INPUT
+                                            }
 
-                                        if (playlistContent != null) {
-
-                                            channels = M3UParser.parse(
-                                                playlistContent
-                                            )
-
-                                            currentScreen =
-                                                AppScreen.CHANNELS
+                                            "Playlists" -> {
+                                                currentScreen = AppScreen.PLAYLISTS
+                                            }
                                         }
                                     }
+                                )
+                            }
+
+                            AppScreen.URL_INPUT -> {
+
+                                BackHandler {
+                                    currentScreen = AppScreen.MENU
                                 }
-                            )
-                        }
 
-                        AppScreen.CHANNELS -> {
+                                URLInputScreen(
+                                    isLoading = isLoading,
+                                    onLoadClicked = { url ->
 
-                            BackHandler {
-                                currentScreen = AppScreen.MENU
-                            }
+                                        if (
+                                            !url.startsWith("http://") &&
+                                            !url.startsWith("https://")
+                                        ) {
+                                            return@URLInputScreen
+                                        }
 
-                            HomeScreen(
-                                channels = channels,
-                                onChannelSelected = {
-                                    selectedChannel = it
-                                    currentScreen = AppScreen.PLAYER
-                                }
-                            )
-                        }
+                                        scope.launch {
 
-                        AppScreen.PLAYER -> {
+                                            DataStoreManager.savePlaylistUrl(
+                                                context,
+                                                url
+                                            )
 
-                            BackHandler {
-                                currentScreen = AppScreen.CHANNELS
-                            }
+                                            currentPlaylistUrl = url
 
-                            VideoPlayerScreen(
-                                streamUrl = selectedChannel!!.streamUrl
-                            )
-                        }
+                                            isLoading = true
 
-                        AppScreen.PLAYLISTS -> {
+                                            val playlistContent =
+                                                withContext(Dispatchers.IO) {
 
-                            BackHandler {
-                                currentScreen = AppScreen.MENU
-                            }
+                                                    PlaylistDownloader.download(url)
+                                                }
 
-                            PlaylistsScreen(
-                                currentPlaylistUrl = currentPlaylistUrl,
-                                onChangePlaylist = {
-                                    currentScreen = AppScreen.URL_INPUT
-                                },
-                                onClearPlaylist = {
+                                            isLoading = false
 
-                                    scope.launch {
+                                            if (playlistContent != null) {
 
-                                        DataStoreManager.clearPlaylistUrl(
-                                            context
-                                        )
+                                                channels = M3UParser.parse(
+                                                    playlistContent
+                                                )
 
-                                        currentPlaylistUrl = null
-
-                                        channels = emptyList()
-
-                                        selectedChannel = null
-
-                                        currentScreen = AppScreen.URL_INPUT
+                                                currentScreen =
+                                                    AppScreen.CATEGORIES
+                                            }
+                                        }
                                     }
+                                )
+                            }
+
+//                            AppScreen.CHANNELS -> {
+//
+//                                BackHandler {
+//                                    currentScreen = AppScreen.MENU
+//                                }
+//
+//                                HomeScreen(
+//                                    channels = channels,
+//                                    onChannelSelected = {
+//                                        selectedChannel = it
+//                                        currentScreen = AppScreen.PLAYER
+//                                    }
+//                                )
+//                            }
+
+                            AppScreen.PLAYER -> {
+
+                                BackHandler {
+                                    currentScreen = AppScreen.CATEGORY_CHANNELS
                                 }
-                            )
-                        }
+
+                                VideoPlayerScreen(
+                                    streamUrl = selectedChannel!!.streamUrl
+                                )
+                            }
+
+                            AppScreen.PLAYLISTS -> {
+
+                                BackHandler {
+                                    currentScreen = AppScreen.MENU
+                                }
+
+                                PlaylistsScreen(
+                                    currentPlaylistUrl = currentPlaylistUrl,
+                                    channelCount = channels.size,
+                                    onChangePlaylist = {
+                                        currentScreen = AppScreen.URL_INPUT
+                                    },
+                                    onClearPlaylist = {
+
+                                        scope.launch {
+
+                                            DataStoreManager.clearPlaylistUrl(
+                                                context
+                                            )
+
+                                            currentPlaylistUrl = null
+
+                                            channels = emptyList()
+
+                                            selectedChannel = null
+
+                                            currentScreen = AppScreen.URL_INPUT
+                                        }
+                                    }
+                                )
+                            }
+
+                            AppScreen.CATEGORIES -> {
+
+                                BackHandler {
+                                    currentScreen = AppScreen.MENU
+                                }
+
+                                CategoryScreen(
+                                    categories = channels
+                                        .map { it.category }
+                                        .distinct()
+                                        .sorted(),
+
+                                    onCategorySelected = { category ->
+
+                                        selectedCategory = category
+
+                                        currentScreen =
+                                            AppScreen.CATEGORY_CHANNELS
+                                    }
+                                )
+                            }
+
+                            AppScreen.CATEGORY_CHANNELS -> {
+
+                                BackHandler {
+                                    currentScreen =
+                                        AppScreen.CATEGORIES
+                                }
+
+                                CategoryChannelsScreen(
+
+                                    channels = channels.filter {
+
+                                        it.category == selectedCategory
+                                    },
+
+                                    onChannelSelected = {
+
+                                        selectedChannel = it
+
+                                        currentScreen =
+                                            AppScreen.PLAYER
+                                    }
+                                )
+                            }
                     }
                 }
                 }

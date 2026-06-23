@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PlaylistsScreen(
     currentPlaylistUrl: String?,
+    channelCount: Int,
     onChangePlaylist: () -> Unit,
     onClearPlaylist: () -> Unit
 ) {
@@ -28,6 +29,14 @@ fun PlaylistsScreen(
         Text(
             text = currentPlaylistUrl
                 ?: "No playlist configured"
+        )
+
+        Text(
+            text = "Type: URL Playlist"
+        )
+
+        Text(
+            text = "Channels Loaded: $channelCount"
         )
 
         Button(
