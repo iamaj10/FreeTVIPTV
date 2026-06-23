@@ -3,21 +3,32 @@ package com.freetv.iptv.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Modifier
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.tv.material3.Button
 import androidx.tv.material3.Text
+import androidx.compose.ui.unit.dp
 
 @Composable
-fun SettingsScreen(
+fun PlaylistsScreen(
+    currentPlaylistUrl: String?,
     onChangePlaylist: () -> Unit,
     onClearPlaylist: () -> Unit
 ) {
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+
+        Text(
+            text = "Current Playlist"
+        )
+
+        Text(
+            text = currentPlaylistUrl
+                ?: "No playlist configured"
+        )
 
         Button(
             onClick = onChangePlaylist

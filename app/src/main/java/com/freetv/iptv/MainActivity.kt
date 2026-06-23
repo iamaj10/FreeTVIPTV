@@ -28,12 +28,12 @@ import com.freetv.iptv.parser.M3UParser
 import com.freetv.iptv.screen.MainMenuScreen
 import com.freetv.iptv.screen.URLInputScreen
 import com.freetv.iptv.screen.LoadingScreen
-import com.freetv.iptv.screen.SettingsScreen
+import com.freetv.iptv.screen.PlaylistsScreen
 
 enum class AppScreen {
     MENU,
     URL_INPUT,
-    SETTINGS,
+    PLAYLISTS,
     CHANNELS,
     PLAYER
 }
@@ -69,10 +69,15 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(false)
             }
 
+            var currentPlaylistUrl by remember {
+                mutableStateOf<String?>(null)
+            }
+
             LaunchedEffect(Unit) {
 
                 val savedUrl =
                     DataStoreManager.getPlaylistUrl(context)
+                currentPlaylistUrl = savedUrl
 
                 if (savedUrl != null) {
 
@@ -129,8 +134,8 @@ class MainActivity : ComponentActivity() {
                                             currentScreen = AppScreen.URL_INPUT
                                         }
 
-                                        "Settings" -> {
-                                            currentScreen = AppScreen.SETTINGS
+                                        "Playlists" -> {
+                                            currentScreen = AppScreen.PLAYLISTS
                                         }
                                     }
                                 }
@@ -160,6 +165,8 @@ class MainActivity : ComponentActivity() {
                                             context,
                                             url
                                         )
+
+                                        currentPlaylistUrl = url
 
                                         isLoading = true
 
@@ -211,13 +218,14 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        AppScreen.SETTINGS -> {
+                        AppScreen.PLAYLISTS -> {
 
                             BackHandler {
                                 currentScreen = AppScreen.MENU
                             }
 
-                            SettingsScreen(
+                            PlaylistsScreen(
+                                currentPlaylistUrl = currentPlaylistUrl,
                                 onChangePlaylist = {
                                     currentScreen = AppScreen.URL_INPUT
                                 },
@@ -228,6 +236,8 @@ class MainActivity : ComponentActivity() {
                                         DataStoreManager.clearPlaylistUrl(
                                             context
                                         )
+
+                                        currentPlaylistUrl = null
 
                                         channels = emptyList()
 
